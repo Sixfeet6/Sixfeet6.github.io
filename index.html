@@ -1,19 +1,50 @@
 <!DOCTYPE html>
 <html>
-<head>�
-<meta�charset="utf-8">�
-<title>�^4</title>�
+<head>
+    <meta charset="utf-8">
+    <title>PDF.js 示例</title>
+    <!-- 引入 pdf.js 和 pdf.worker.js 文件 -->
+    <script src="pdf.js"></script>
+    <script src="pdf.worker.js"></script>
+    <!-- 定义一个用于显示 PDF 的 canvas 元素 -->
+    <style>
+        #pdf-canvas {
+            border: 1px solid black;
+            width: 800px;
+            height: 600px;
+        }
+    </style>
 </head>
 <body>
+    <h1>PDF.js 示例</h1>
+    <p>这是一个使用 PDF.js 在网页上显示 PDF 文件的示例。</p>
+    <canvas id="pdf-canvas"></canvas>
+    <script>
+        // 获取 canvas 元素
+        var canvas = document.getElementById('pdf-canvas');
+        // 获取 canvas 的上下文对象，用于绘制 PDF
+        var context = canvas.getContext('2d');
 
-<video width="320" height="240" controls autoplay>
-  <source src="https://fgkj.oss-cn-hangzhou.aliyuncs.com/%5BAllMovieHub.guru%5D-Thor.Love.and.Thunder.2021.1080p.CAMRip.HIN.DUB.1XBET.mkv" type="video/ogg">
-  <source src="https://fgkj.oss-cn-hangzhou.aliyuncs.com/%5BAllMovieHub.guru%5D-Thor.Love.and.Thunder.2021.1080p.CAMRip.HIN.DUB.1XBET.mkv" type="video/mkv">
-  <source src="https://fgkj.oss-cn-hangzhou.aliyuncs.com/%5BAllMovieHub.guru%5D-Thor.Love.and.Thunder.2021.1080p.CAMRip.HIN.DUB.1XBET.mkv" type="video/webm">
-  <object data="https://fgkj.oss-cn-hangzhou.aliyuncs.com/%5BAllMovieHub.guru%5D-Thor.Love.and.Thunder.2021.1080p.CAMRip.HIN.DUB.1XBET.mkv" width="320" height="240">
-    <embed width="320" height="240" src="https://fgkj.oss-cn-hangzhou.aliyuncs.com/%5BAllMovieHub.guru%5D-Thor.Love.and.Thunder.2021.1080p.CAMRip.HIN.DUB.1XBET.mkv">
-  </object>
-</video>
+        // 加载 PDF 文件
+        pdfjsLib.getDocument('*.pdf').promise.then(function(pdf) {
+            // 获取 PDF 的第一页
+            pdf.getPage(1).then(function(page) {
+                // 设置 PDF 的缩放比例
+                var scale = 1.5;
+                // 获取 PDF 的视口，根据缩放比例和 canvas 的大小调整
+                var viewport = page.getViewport({scale: scale});
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
 
+                // 渲染 PDF 到 canvas 上
+                var renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+                page.render(renderContext);
+            });
+        });
+    </script>
 </body>
 </html>
+
