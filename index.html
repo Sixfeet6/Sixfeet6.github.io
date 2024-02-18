@@ -1,49 +1,56 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <title>PDF.js 示例</title>
-    <!-- 引入 pdf.js 和 pdf.worker.js 文件 -->
+    <title>PDF Viewer</title>
+    <!-- 引入pdf.js和pdf.worker.js文件 -->
     <script src="pdf.js"></script>
     <script src="pdf.worker.js"></script>
-    <!-- 定义一个用于显示 PDF 的 canvas 元素 -->
-    <style>
-        #pdf-canvas {
-            border: 1px solid black;
-            width: 800px;
-            height: 600px;
-        }
-    </style>
 </head>
 <body>
-    <h1>PDF.js 示例</h1>
-    <p>这是一个使用 PDF.js 在网页上显示 PDF 文件的示例。</p>
-    <canvas id="pdf-canvas"></canvas>
+    <h1>PDF Viewer</h1>
+    <!-- 创建一个canvas元素，用来渲染PDF -->
+    <canvas id="pdf-canvas" width="800" height="600"></canvas>
+    <!-- 创建一个script元素，用来加载和显示PDF -->
     <script>
-        // 获取 canvas 元素
-        var canvas = document.getElementById('pdf-canvas');
-        // 获取 canvas 的上下文对象，用于绘制 PDF
-        var context = canvas.getContext('2d');
+        // 获取canvas元素和绘图上下文
+        var canvas = document.getElementById("pdf-canvas");
+        var context = canvas.getContext("2d");
 
-        // 加载 PDF 文件
-        pdfjsLib.getDocument('*.pdf').promise.then(function(pdf) {
-            // 获取 PDF 的第一页
-            pdf.getPage(1).then(function(page) {
-                // 设置 PDF 的缩放比例
-                var scale = 1.5;
-                // 获取 PDF 的视口，根据缩放比例和 canvas 的大小调整
-                var viewport = page.getViewport({scale: scale});
-                canvas.width = viewport.width;
-                canvas.height = viewport.height;
+        // 创建一个PDF文档对象
+        var pdfDoc = null;
 
-                // 渲染 PDF 到 canvas 上
-                var renderContext = {
-                    canvasContext: context,
-                    viewport: viewport
-                };
-                page.render(renderContext);
+        // 定义一个函数，用来渲染PDF的第一页
+        function renderPage(page) {
+            // 获取PDF页面的视口，根据canvas的大小进行缩放
+            var viewport = page.getViewport({scale: canvas.width / page.getViewport({scale: 1}).width});
+            // 设置canvas的高度，使其与页面的高度相匹配
+            canvas.height = viewport.height;
+            // 清除canvas的内容
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            // 创建一个渲染任务，将PDF页面绘制到canvas上
+            var renderTask = page.render({
+                canvasContext: context,
+                viewport: viewport
             });
-        });
+        }
+
+        // 定义一个函数，用来加载PDF文件
+        function loadPDF(url) {
+            // 使用pdf.js提供的函数，从URL获取PDF文档对象
+            pdfjsLib.getDocument(url).promise.then(function(doc) {
+                // 将PDF文档对象赋值给全局变量
+                pdfDoc = doc;
+                // 调用渲染函数，显示PDF的第一页
+                renderPage(doc.getPage(1));
+            }).catch(function(error) {
+                // 如果发生错误，打印错误信息
+                console.error(error);
+            });
+        }
+
+        // 调用加载函数，传入目录下的pdf文件的URL
+        // 假设pdf文件的名字是test.pdf，你可以根据实际情况修改
+        loadPDF("test.pdf");
     </script>
 </body>
 </html>
